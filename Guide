@@ -1,0 +1,229 @@
+# IDS using Snort — GitHub Pack (Ready to Copy)
+
+Use this single document to create your repository. Create the folders/files exactly as shown.
+
+---
+
+## 📦 Suggested Repository Name
+
+`IDS-using-Snort`
+
+---
+
+## 🌳 Folder Structure
+
+```
+IDS-using-Snort/
+│── README.md
+│── .gitignore
+│
+├── rules/
+│   └── local.rules
+│
+├── configs/
+│   └── snort.conf.example
+│
+└── docs/
+    └── SETUP.md
+```
+
+---
+
+## 1) `README.md`
+
+````markdown
+# Intrusion Detection System (IDS) Using Snort
+
+**Timeline:** Dec 2024 – Jan 2025  
+**Author:** Sayyed Amaan
+
+## 📌 Overview
+This project implements a real-time **Intrusion Detection System (IDS)** using **Snort**. It monitors live network traffic, performs advanced packet inspection, and identifies patterns associated with common cyber threats (port scans, brute-force attempts, exploit payloads). The detection capability is enhanced with **custom Snort rules**.
+
+## 🚀 Key Features
+- Real-time traffic monitoring & analysis
+- Packet capture, inspection, and filtering
+- Detection for: TCP port scans, SSH/FTP brute-force, suspicious downloads, SQLi, shellcode
+- Tuned with custom **`local.rules`**
+
+## 🛠️ Tech Stack
+- **Snort** (IDS)
+- **Linux** (Ubuntu/Debian/Kali)
+- **tcpdump / Wireshark** (optional verification)
+
+## ⚡ Quick Start
+```bash
+# 1) Install Snort (Debian/Ubuntu-based)
+sudo apt-get update && sudo apt-get install -y snort
+
+# 2) Verify installation
+snort -V
+
+# 3) Copy repo files into place (example paths)
+sudo mkdir -p /etc/snort/rules
+sudo cp rules/local.rules /etc/snort/rules/local.rules
+sudo cp configs/snort.conf.example /etc/snort/snort.conf
+
+# 4) Run Snort in IDS mode (replace eth0 with your interface)
+sudo snort -A console -q -c /etc/snort/snort.conf -i eth0
+````
+
+## 🧩 Rule Pack Included
+
+See `rules/local.rules` for ready-made detections: ICMP ping, port scans, SSH/FTP brute force, suspicious `.exe` downloads, SQL injection, and shellcode (NOP sleds).
+
+## 🔧 Configuration Notes
+
+* Ensure `snort.conf` contains: `include $RULE_PATH/local.rules`.
+* Set correct network variables: `HOME_NET` (your protected network) and `EXTERNAL_NET`.
+
+## 🧪 Testing Ideas
+
+* **ICMP**: `ping <target>`
+* **Port scan**: `nmap -sS -p 1-100 <target>`
+* **SSH brute**: multiple rapid SSH attempts to port 22 (lab only)
+* **HTTP .exe**: request a URL ending with `.exe` (lab only)
+* **SQLi**: send `"' OR 1=1 --"` to a test web form on port 80 (lab only)
+
+> ⚠️ **Legal & Safety**: Only test on systems you own or explicitly have permission to test. Use an isolated lab.
+
+## 📈 Future Enhancements
+
+* SIEM integration (ELK/Splunk)
+* Email/Slack alerting
+* ML-based anomaly detection
+
+## 📝 License
+
+MIT (optional) — add a `LICENSE` file if needed.
+
+````
+
+---
+
+## 2) `rules/local.rules`
+```snort
+# -------------------------------
+# Snort Custom Local Rules
+# Project: IDS using Snort
+# Author: Sayyed Amaan
+# Timeline: Dec 2024 – Jan 2025
+# -------------------------------
+
+# 1. ICMP Ping Detection
+alert icmp any any -> any any (msg:"ICMP Ping Detected"; sid:1000001; rev:1;)
+
+# 2. TCP Port Scanning Detection
+alert tcp any any -> any any (msg:"Possible TCP Port Scan"; flags:S; threshold:type both, track by_src, count 20, seconds 10; sid:1000002; rev:1;)
+
+# 3. SSH Brute Force Attempt Detection
+alert tcp any any -> any 22 (msg:"Possible SSH Brute Force Attempt"; flow:to_server,established; detection_filter:track by_src, count 5, seconds 60; sid:1000003; rev:1;)
+
+# 4. FTP Brute Force Attempt Detection
+alert tcp any any -> any 21 (msg:"Possible FTP Brute Force Attempt"; flow:to_server,established; detection_filter:track by_src, count 5, seconds 60; sid:1000004; rev:1;)
+
+# 5. Suspicious .exe File Download
+alert tcp any any -> any any (msg:"Suspicious .exe file download"; content:".exe"; nocase; http_uri; sid:1000005; rev:1;)
+
+# 6. Basic SQL Injection Attempt
+alert tcp any any -> any 80 (msg:"Possible SQL Injection Attempt"; flow:to_server,established; content:"' OR 1=1"; nocase; sid:1000006; rev:1;)
+
+# 7. Shellcode / NOP Sled Detection
+alert tcp any any -> any any (msg:"Shellcode Detected"; content:"|90 90 90|"; sid:1000007; rev:1;)
+
+# -------------------------------
+# End of Custom Local Rules
+# -------------------------------
+````
+
+---
+
+## 3) `configs/snort.conf.example`
+
+```conf
+# Minimal example for this project. Start from your system's default snort.conf
+# and adapt safely. Paths may vary by distro.
+
+var RULE_PATH /etc/snort/rules
+var SO_RULE_PATH /etc/snort/so_rules
+var PREPROC_RULE_PATH /etc/snort/preproc_rules
+
+# Set your protected network here
+var HOME_NET [192.168.0.0/16]
+var EXTERNAL_NET any
+
+# Include local custom rules
+include $RULE_PATH/local.rules
+
+# Output to console for demo purposes
+output alert_fast: stdout
+```
+
+> ℹ️ Copy to `/etc/snort/snort.conf` and adjust `HOME_NET` + interface.
+
+---
+
+## 4) `docs/SETUP.md`
+
+````markdown
+# Setup & Usage
+
+## Install Snort (Debian/Ubuntu)
+```bash
+sudo apt-get update && sudo apt-get install -y snort
+snort -V
+````
+
+## Place Files
+
+```bash
+sudo mkdir -p /etc/snort/rules
+sudo cp rules/local.rules /etc/snort/rules/local.rules
+sudo cp configs/snort.conf.example /etc/snort/snort.conf
+```
+
+## Run Snort (IDS mode)
+
+```bash
+# Replace eth0 with your network interface
+sudo snort -A console -q -c /etc/snort/snort.conf -i eth0
+```
+
+## Verify Alerts
+
+* Trigger test traffic (ping/nmap/etc.).
+* Watch console output for alerts.
+* Optionally, enable file logging in `snort.conf` and inspect `/var/log/snort/`.
+
+## Troubleshooting
+
+* **No alerts?** Confirm correct network interface and `HOME_NET`.
+* **Permission errors?** Use `sudo`.
+* **Rule not loading?** Ensure `include $RULE_PATH/local.rules` is present and path exists.
+
+````
+
+---
+
+## 5) `.gitignore`
+```gitignore
+# Logs & runtime
+logs/
+*.log
+*.pcap
+*.pcapng
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+````
+
+---
+
+## ✅ Upload Checklist
+
+* [ ] Create repo `IDS-using-Snort`
+* [ ] Add folders: `rules/`, `configs/`, `docs/`
+* [ ] Paste files exactly as above
+* [ ] Commit → Push → Update README screenshots later (optional)
