@@ -1,0 +1,10 @@
+# Logs & runtime files
+logs/
+*.log
+*.pcap
+*.pcapng
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
