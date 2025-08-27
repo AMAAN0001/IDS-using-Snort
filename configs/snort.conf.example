@@ -18,3 +18,4 @@ include $RULE_PATH/local.rules
 
 # Output to console for demo purposes
 output alert_fast: stdout
+ℹ️ Copy to /etc/snort/snort.conf and adjust HOME_NET + interface.
