@@ -1,0 +1,20 @@
+# Minimal example for this project. Start from your system's default snort.conf
+# and adapt safely. Paths may vary by distro.
+
+
+var RULE_PATH /etc/snort/rules
+var SO_RULE_PATH /etc/snort/so_rules
+var PREPROC_RULE_PATH /etc/snort/preproc_rules
+
+
+# Set your protected network here
+var HOME_NET [192.168.0.0/16]
+var EXTERNAL_NET any
+
+
+# Include local custom rules
+include $RULE_PATH/local.rules
+
+
+# Output to console for demo purposes
+output alert_fast: stdout
